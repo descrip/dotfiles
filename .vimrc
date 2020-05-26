@@ -1,89 +1,82 @@
-" vimrc, jeffrey zhao (descrip)
-" updated 2018/03/02
-
-" download vim-plug:
-" curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-"     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-" then do :PlugInstall
-
-" requires extra installation for command-t (:help command-t-install)
-" requires cpp template file ~/.vim/templates/skeleton.cpp (search "templates")
-" requires latexmk, mupdf for latex flow
-" good idea to also install clipit to preserve copied text while in bg
-
-" plug package manager
+" vimrc, jeffrey zhao, updated 2020/05/22
 call plug#begin()
-Plug 'wincent/command-t'
-Plug 'sjl/gundo.vim'
+Plug 'mbbill/undotree'
 Plug 'tpope/vim-fugitive'
-Plug 'Konfekt/FastFold'
-Plug 'ntpeters/vim-better-whitespace'
-Plug 'scrooloose/nerdtree'
-Plug 'dhruvasagar/vim-markify'
-
-" notes
-Plug 'xolox/vim-misc'
-Plug 'xolox/vim-notes'
-
-" c++
-Plug 'octol/vim-cpp-enhanced-highlight'
+Plug 'itchyny/lightline.vim'
+" Plug 'dense-analysis/ale'
+" Plug 'maximbaz/lightline-ale'
+Plug 'lervag/vimtex'
+Plug 'rust-lang/rust.vim'
+Plug 'neovimhaskell/haskell-vim'
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'bouk/vim-markdown', { 'branch': 'wikilinks' }
 call plug#end()
 
-" base
 filetype plugin indent on
 syntax on
-set number relativenumber                   " numbering
-set shiftwidth=2 tabstop=2                  " tabs to 2 spaces
-set expandtab softtabstop=2                 " tabs to 2 spaces
-set nobackup nowritebackup noswapfile       " no backup or swap files
-set splitbelow splitright                   " open new splits below and right
-set mouse=a                                 " enable all mouse actions
-set colorcolumn=80                          " show 80 char line
-set wildmenu                                " show autocomplete choices
-set lazyredraw                              " redraw only when we need to
-set showmatch                               " highlight matching [{()}]
-set incsearch hlsearch                      " incremental and highlight search
-colorscheme ron                             " mckenzie
+set number relativenumber     " absolute and relative numbering
+set shiftwidth=2 tabstop=2 expandtab softtabstop=2
+set autoindent smartindent
+set nobackup nowritebackup noswapfile
+set mouse=a                   " all mouse actions
+set colorcolumn=80            " 80 char line
+set wildmenu
+set lazyredraw
+set showmatch
+set incsearch hlsearch
+set completeopt=longest,menuone
+set t_Co=256                  " 256 colors in terminal
+colorscheme ron " mckenzie
 
-" plugin options
-let g:notes_directories = ['~/Documents/notes', '~/Dropbox/notes']
-
-" mappings and macros
-" leader is comma
-let mapleader=","
-" jj to escape
+" leader and simple maps
+let mapleader=" "
+let maplocalleader=" "
 inoremap jj <Esc>
-" turn off search highlight
-nnoremap <leader><space> :nohlsearch<CR>
-" toggle gundo
-nnoremap <leader>u :GundoToggle<CR>
-" latex (rubber) macro for compiling and viewing with mupdf
-nnoremap <leader>c :w<CR>:!latexmk --pdf %<CR>
-nnoremap <leader>v :!mupdf %:r.pdf &<CR><CR>
-" ctrl-n to toggle NERDTree
-map <leader>f :NERDTreeToggle<CR>
-" F9 to make
-map <f9> :make<CR>
+nnoremap <leader>u :UndotreeToggle<CR>
+command! MakeTags !ctags -R .
+
+" move between panes
+noremap <C-h> <C-w>h
+noremap <C-j> <C-w>j
+noremap <C-k> <C-w>k
+noremap <C-l> <C-w>l
+" preserve redraw mapping
+nmap <leader>l :redraw!<CR>
 
 " autocommands
 if has("autocmd")
   " open file at last closed position
   au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$")
     \| exe "normal! g'\"" | endif
-
-  " template for competitive programming when opening .cpp file
-  augroup templates
-    autocmd BufNewFile *.cpp 0r ~/.vim/templates/skeleton.cpp
-  augroup END
 endif
 
-" filetype specific configs
-augroup configgroup
-  autocmd!
-  autocmd VimEnter * highlight clear SignColumn
-  autocmd FileType java setlocal noexpandtab
-  autocmd FileType php setlocal expandtab
-  autocmd FileType ruby setlocal commentstring=#\ %s
-  autocmd FileType python setlocal tabstop=4 shiftwidth=4 softtabstop=4 commentstring=#\ %s
-  autocmd BufEnter Makefile setlocal noexpandtab
-augroup END
+" netrw settings
+let g:netrw_bufsettings='noma nomod nu rnu nobl nowrap ro'
+let g:netrw_banner=0
+let g:netrw_liststyle=3     " tree view
+
+" activate lightline on all windows
+set laststatus=2
+
+" fzf mappings
+imap <C-K> <plug>(fzf-complete-word)
+imap <C-F> <plug>(fzf-complete-path)
+imap <C-L> <plug>(fzf-complete-line)
+nmap <leader>o :Files<CR>
+
+" vim-markdown settings
+let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_no_extensions_in_markdown = 1
+
+" " ale settings
+" nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+" nmap <silent> <C-j> <Plug>(ale_next_wrap)
+" let g:ale_open_list=1
+" " ale rust settings
+" let g:ale_rust_cargo_use_check=1
+" let g:ale_rust_cargo_check_all_targets=1
+" let g:ale_rust_cargo_check_tests=1
+" let g:ale_rust_cargo_check_examples=1
+" let g:rustfmt_autosave=1
